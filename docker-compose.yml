@@ -1,0 +1,36 @@
+services:
+  chatbotapi_proxy:
+    build:
+      dockerfile: ./dockerfiles/nginx/dockerfile
+      context: .
+    volumes:
+      - ./shared/:/shared/
+    restart: always
+    ports:
+      - 80:80
+    networks:
+      - chatbotnetwork
+    depends_on:
+      - chatbotapi
+  chatbotapi:
+    build:
+      dockerfile: ./dockerfiles/chatbotapi/dockerfile
+      context: .
+    volumes:
+      - ./shared/:/shared/
+      - ./bd/:/bd/
+    ports:
+      - 3000:3000
+    networks:
+      - chatbotnetwork
+    env_file: .env
+  telegrambot:
+    build:
+      dockerfile: ../dockerfiles/telegrambot/dockerfile
+      context: ./telegrambot
+    env_file:
+      - .env.telegrambot
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+networks:
+  chatbotnetwork:
